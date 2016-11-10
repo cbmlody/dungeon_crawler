@@ -3,7 +3,12 @@ import time
 from getch import getch, pause
 from knowhow import you_know_it
 from welcomescreen import intro
+from boss_art import boss_init  # importing boss asci art
+import cold_hot as boss_game  # importing cold_hot game
 
+# TODO: fix boss ascii art coloring
+# TODO: add another levels if possible
+# TODO: maybe more coloring?
 
 ITEMS = ['^', '&', '%', '!', '*']
 
@@ -30,10 +35,10 @@ def loot_table(inventory, order=None):
 
     list_help.append('{:<30}'.format('-'*29))
     list_help.append('{text:<30}'.format(text='Total items: %s' % total))
-    return list_help
+    return list_help, total  # returns total to check how many items we have
 
 
-def create_board(inv):
+def create_board(inv, total):
     # board = [['.' if y > 0 and y < 39 else '\033[7;30;43m' + '#' + '\033[0m' for y in range(40)] if x > 0 and x < 19
     #          else ['\033[7;30;43m' + '#' + '\033[0m' for x in range(40)] for x in range(20)]
     board = []
@@ -82,6 +87,10 @@ def hero_pos(board, x=10, y=10):
     return x, y
 
 
+def item_pos(item_sign, board, a=15, b=20):
+    board[a][b] = item_sign
+
+
 def walk(board, x, y, inv):
     move = getch()
 
@@ -111,12 +120,14 @@ def walk(board, x, y, inv):
         x = limit_x
         y = limit_y
 
+    if board[y][x] == '😠':  # boss fight here
+        os.system('clear')
+        boss_init()  # boss ascii art init
+        os.system('clear')
+        boss_game.main()  # boss game init
+
     x, y = hero_pos(board, x, y)
     return x, y, inv
-
-
-def item_pos(item_sign, board, a=15, b=20):
-    board[a][b] = item_sign
 
 
 def add_inv(inventory, item):
@@ -130,6 +141,11 @@ def item_attributes(name, weight=1, it_type='Other'):
     return atributes
 
 
+def boss_position(board, x=38, y=18):  # hello boss
+    board[y][x] = '😠'
+    return board
+
+
 def main():
     intro()
     you_know_it()
@@ -140,8 +156,8 @@ def main():
                  '!': [0, item_attributes(name='patyk', weight=2)]}
 
     os.system('clear')
-    inv = loot_table(inventory)
-    game_board = create_board(inv)
+    inv, total_items = loot_table(inventory)
+    game_board = create_board(inv, total_items)
     x, y = hero_pos(game_board)
     item_pos('&', game_board)
     item_pos('%', game_board, 8, 28)
@@ -152,7 +168,9 @@ def main():
         os.system('clear')
         print_board(game_board, inv)
         x, y, inventory = walk(game_board, x, y, inventory)
-        inv = loot_table(inventory)
+        inv, total_items = loot_table(inventory)
+        if total_items == 5:  # boss showing up after collecting 5 items
+            game_board = boss_position(game_board)
 
 if __name__ == '__main__':
     main()
