@@ -45,6 +45,27 @@ def warm(random, guess):
     return result
 
 
+def hot_phrases_list():
+    hot_phrases = ["Suprising!", "Outstanding!", "You're melting my heart",
+        "You burn my feelings"]
+    phrase_num = random.randint(0, len(hot_phrases))
+    print (hot_phrases[phrase_num-1])
+
+
+def warm_phrases_list():
+    warm_phrases = ["You're hot, and you're cold", "Warm me up, before you go go",
+        "You're nothing but warm to me"]
+    phrase_num = random.randint(0, len(warm_phrases))
+    print (warm_phrases[phrase_num-1])
+
+
+def cold_phrases_list():
+    cold_phrases = ["Mwahahahahhaha", "you'll never win!", "You're cold as ice!",
+        "ice, ice Baby!"]
+    phrase_num = random.randint(0, len(cold_phrases))
+    print (cold_phrases[phrase_num-1])
+
+
 def main():
     random_number = pick_number()
     hp = 1
@@ -54,14 +75,21 @@ def main():
         warm_list = warm(random_number, picked_number)
         result = hot_list + warm_list
         if result == ["hot", "hot", "hot"]:
-            print ("GZ")
+            print ("You won this time!")
             pause_exit()
             break
         if len(result) == 0:
             result.append("cold")
+        if "hot" in result:
+            hot_phrases_list()
+        if "warm" in result:
+            warm_phrases_list()
+        if "cold" in result:
+            cold_phrases_list()
         print (result)
         hp += 1
-
-
+    if hp == 11:
+        if result != ["hot", "hot", "hot"]:
+            print ("game over!")
 if __name__ == '__main__':
     main()

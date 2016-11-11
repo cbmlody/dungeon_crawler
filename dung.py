@@ -6,11 +6,9 @@ from welcomescreen import intro
 from boss_art import boss_init  # importing boss asci art
 import cold_hot as boss_game  # importing cold_hot game
 
-# TODO: fix boss ascii art coloring
-# TODO: add another levels if possible
-# TODO: maybe more coloring?
 
 ITEMS = ['^', '&', '%', '!', '*']
+OBSTACLES = ['#', '\x1b[1;32;1m' + '🌵' + '\x1b[0m', '⛰', '\x1b[1;31;1m' + '⌂' + '\x1b[0m']
 
 
 def loot_table(inventory, order=None):
@@ -38,7 +36,7 @@ def loot_table(inventory, order=None):
     return list_help, total  # returns total to check how many items we have
 
 
-def create_board(inv, total):
+def create_board(inv, total, level):
     # board = [['.' if y > 0 and y < 39 else '\033[7;30;43m' + '#' + '\033[0m' for y in range(40)] if x > 0 and x < 19
     #          else ['\033[7;30;43m' + '#' + '\033[0m' for x in range(40)] for x in range(20)]
     board = []
@@ -53,24 +51,103 @@ def create_board(inv, total):
                 else:
                     rows.append(' ')
         board.append(rows)
-    board = building_gen(board)
+    if level == 1:
+        board = board_obstacle_one(board)
+    elif level == 2:
+        board = board_obstacle_two(board)
+    elif level == 3:
+        board = board_obstacle_three(board)
     return board
 
 
-def building_gen(board):
+def board_obstacle_one(board):
     # print(board)
     for x in range(3, 8):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
         for y in range(3, 7):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;31;1m' + 'x' + '\x1b[0m'
+            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
     for x in range(28, 34):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
         for y in range(2, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;31;1m' + 'x' + '\x1b[0m'
+            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
     for x in range(20, 25):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
         for y in range(12, 18):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;31;1m' + 'x' + '\x1b[0m'
+            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
     for x in range(4, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
         for y in range(11, 17):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;31;1m' + 'x' + '\x1b[0m'
+            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
+
+    item_pos('&', board)
+    item_pos('%', board, 8, 28)
+    item_pos('^', board, 5, 7)
+    item_pos('!', board, 16, 30)
+    item_pos('*', board, 16, 4)
+    return board
+
+
+def board_obstacle_two(board):
+    # print(board)
+    for x in range(5, 7):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(1, 7):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(28, 30):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(1, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(8, 10):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(11, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(24, 26):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(13, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(18, 20):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(1, 14):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(11, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    item_pos('&', board)
+    item_pos('%', board, 3, 33)
+    item_pos('^', board, 2, 4)
+    item_pos('!', board, 12, 24)
+    item_pos('*', board, 18, 14)
+    return board
+
+
+def board_obstacle_three(board):
+    # print(board)
+    for x in range(5, 6):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(3, 4):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(28, 29):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(9, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(24, 25):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(19, 20):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(13, 14):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(16, 17):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(13, 14):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(10, 11):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(27, 28):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(7, 8):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(27, 28):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(2, 3):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    item_pos('&', board)
+    item_pos('%', board, 8, 28)
+    item_pos('^', board, 5, 7)
+    item_pos('!', board, 16, 30)
+    item_pos('*', board, 16, 4)
     return board
 
 
@@ -112,11 +189,7 @@ def walk(board, x, y, inv):
     if board[y][x] in ITEMS:
         inv = add_inv(inv, board[y][x])
 
-    if board[y][x] == '#':
-        x = limit_x
-        y = limit_y
-
-    if board[y][x] == '\x1b[1;31;1m' + 'x' + '\x1b[0m':
+    if board[y][x] in OBSTACLES:
         x = limit_x
         y = limit_y
 
@@ -146,8 +219,14 @@ def boss_position(board, x=38, y=18):  # hello boss
     return board
 
 
+def next_level(level, inventory, total):
+    board = create_board(inventory, total, level)
+    return board
+
+
 def main():
     intro()
+    os.system('clear')
     you_know_it()
     inventory = {'^': [0, item_attributes(name='czapka', weight=2, it_type='Clothes')],
                  '&': [0, item_attributes(name='szal', weight=1, it_type='Clothes')],
@@ -156,21 +235,26 @@ def main():
                  '!': [0, item_attributes(name='patyk', weight=2)]}
 
     os.system('clear')
+    level = 1
     inv, total_items = loot_table(inventory)
-    game_board = create_board(inv, total_items)
+    game_board = create_board(inv, total_items, level)
     x, y = hero_pos(game_board)
-    item_pos('&', game_board)
-    item_pos('%', game_board, 8, 28)
-    item_pos('^', game_board, 5, 7)
-    item_pos('!', game_board, 16, 30)
-    item_pos('*', game_board, 16, 4)
     while True:
         os.system('clear')
+        if level == 1 and total_items == 5:
+            level += 1
+            game_board = next_level(level, inv, total_items)
+            x, y = hero_pos(game_board)
+        elif level == 2 and total_items == 10:
+            level += 1
+            game_board = next_level(level, inv, total_items)
+            x, y = hero_pos(game_board)
+        elif level == 3 and total_items == 15:
+            game_board = boss_position(game_board)
+
         print_board(game_board, inv)
         x, y, inventory = walk(game_board, x, y, inventory)
         inv, total_items = loot_table(inventory)
-        if total_items == 5:  # boss showing up after collecting 5 items
-            game_board = boss_position(game_board)
 
 if __name__ == '__main__':
     main()

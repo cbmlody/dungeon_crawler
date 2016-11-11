@@ -1,42 +1,126 @@
-def print_table(inventory, order=None):
-    '''Prints formatted inventory depending on order (default=None).
-
-    Args:
-        inventory (dict): current inventory
-        order (str, optional): if left unfilled prints unsorted inventory,
-            'count,asc' prints sorted inventory ascending based on item count
-            'count,desc' prints sorted inventory descending based in item count
-    '''
-    list_help = []
-    total = 0
-    list_help.append('{:30}'.format('Inventory:'))
-    list_help.append('{t1:^3}|{t3:^3}|{t2:^8}|{t4:^3}|{t5:^9}'.format(t1='it', t2='name', t3='cnt',
-                     t4='wgt', t5='type'))
-    list_help.append('{:<30}'.format('-'*27))
-    # it's alive!
-    for item in inventory:
-        print(item, inventory[item][0], inventory[item][1])
-        list_help.append('{it:^3}|{t1:^3}|{t2:20}'.format(it=item, t1=inventory[item][0], t2=inventory[item][1]))
-
-    list_help.append('{:<30}'.format('-'*27))
-    list_help.append('Total items: {}'.format(total))
-    return list_help
+import os
+from random import randint
 
 
-def item_attributes(name, weight=1, it_type='Other'):
-    atributes = '{:^8}{:^3}{:^9}'.format(name, weight, it_type)
-    return atributes
+def create_board(level):
+    board = [['.' if y > 0 and y < 39 else '\033[7;30;43m' + '#' + '\033[0m' for y in range(40)] if x > 0 and x < 19
+             else ['\033[7;30;43m' + '#' + '\033[0m' for x in range(40)] for x in range(20)]
+    if level == 1:
+        board = board_obstacle_one(board)
+    elif level == 2:
+        board = board_obstacle_two(board)
+    elif level == 3:
+        board = board_obstacle_three(board)
+    return board
+
+
+def board_obstacle_one(board):
+    # print(board)
+    for x in range(3, 8):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(3, 7):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
+    for x in range(28, 34):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(2, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
+    for x in range(20, 25):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(12, 18):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
+    for x in range(4, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(11, 17):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
+
+    item_pos('&', board)
+    item_pos('%', board, 8, 28)
+    item_pos('^', board, 5, 7)
+    item_pos('!', board, 16, 30)
+    item_pos('*', board, 16, 4)
+    return board
+
+
+def board_obstacle_two(board):
+    # print(board)
+    for x in range(5, 7):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(1, 7):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(28, 30):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(1, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(8, 10):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(11, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(24, 26):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(13, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(18, 20):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(1, 14):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(11, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '⛰'
+    item_pos('&', board)
+    item_pos('%', board, 3, 33)
+    item_pos('^', board, 2, 4)
+    item_pos('!', board, 12, 24)
+    item_pos('*', board, 18, 14)
+    return board
+
+
+def board_obstacle_three(board):
+    # print(board)
+    for x in range(5, 6):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(3, 4):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(28, 29):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(9, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(24, 25):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(19, 20):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(13, 14):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(16, 17):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(13, 14):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(10, 11):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(27, 28):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(7, 8):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    for x in range(27, 28):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
+        for y in range(2, 3):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
+            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
+    item_pos('&', board)
+    item_pos('%', board, 8, 28)
+    item_pos('^', board, 5, 7)
+    item_pos('!', board, 16, 30)
+    item_pos('*', board, 16, 4)
+    return board
+
+
+def print_board(board):
+    for row in board:
+        print('{}'.format(''.join(row)))
+
+
+def item_pos(item_sign, board):
+    a = randint(1, 38)
+    b = randint(1, 18)
+
+    board[a][b] = item_sign
 
 
 def main():
-    inventory = {'^': [0, item_attributes(name='czapka', weight=2, it_type='Clothes')],
-                 '&': [0, item_attributes(name='szal', weight=1, it_type='Clothes')],
-                 '%': [0, item_attributes(name='browar', weight=5, it_type='Food')],
-                 '*': [0, item_attributes(name='ciastko', weight=1, it_type='Food')],
-                 '!': [0, item_attributes(name='patyk', weight=2)]}
-
-    inv = print_table(inventory)
-    print(inv)
+    level = 1
+    game_board = create_board(level)
+    print_board(game_board)
 
 if __name__ == '__main__':
     main()
