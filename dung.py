@@ -1,158 +1,97 @@
-import os
-import time
-from random import randint
-from getch import getch, pause
-from knowhow import you_know_it
-from welcomescreen import intro
-from boss_art import boss_init  # importing boss asci art
+from os import system
+from random import randint, choice
+from getch import getch, pause  # additional module for instant input reading
+import ascii_art  # importing ascii arts
 import cold_hot as boss_game  # importing cold_hot game
 
 
-ITEMS = ['^', '&', '%', '!', '*']
-OBSTACLES = ['#', '\x1b[1;32;1m' + '🌵' + '\x1b[0m', '⛰', '\x1b[1;31;1m' + '⌂' + '\x1b[0m']
+ITEMS = ['^', '%', '&', '!', '*']
+OBSTACLES = ['\x1b[1;33;40m'+'#'+'\x1b[0m', '\x1b[1;33;1m'+'🌵'+'\x1b[0m', '\x1b[0;37;0m'+'⛰'+'\x1b[0m',
+             '\x1b[1;31;1m'+'⌂'+'\x1b[0m', '\x1b[1;32;1m'+'🌳'+'\x1b[0m']
+HERO_START_POS = ((1, 1), (1, 18), (38, 1), (38, 18))
 
 
-def loot_table(inventory, order=None):
-    '''Prints formatted inventory depending on order (default=None).
+def loot_table(inventory):
+    '''Returns formatted inventory as list of strings for better screening.
 
     Args:
         inventory (dict): current inventory
-        order (str, optional): if left unfilled prints unsorted inventory,
-            'count,asc' prints sorted inventory ascending based on item count
-            'count,desc' prints sorted inventory descending based in item count
+    Returns:
+        inv_formated: inventory foramted as list of strings
+        total: total number of items in inventory
     '''
-    list_help = []
+    inv_formated = []
     total = 0
-    list_help.append('{:30}'.format('Inventory:'))
-    list_help.append('{t1:^3}|{t3:^3}|{t2:^8}|{t4:^3}|{t5:^9}'.format(t1='it', t2='name', t3='cnt',
-                     t4='wgt', t5='type'))
-    list_help.append('{:<30}'.format('-'*29))
-    # it's alive!
+    inv_formated.append('{:^44}'.format('\x1b[1;32;40m'+'INVENTORY'+'\x1b[0m'))
+    inv_formated.append('{t1:^3}|{t3:^3}|{t2:^8}|{t4:^3}|{t5:^9}'.format(t1='it', t2='name', t3='cnt',
+                        t4='wgt', t5='type'))
+    inv_formated.append('{:<30}'.format('-'*29))
+
     for item in inventory:
-        list_help.append('{it:^3}|{t1:^3}|{t2:20}'.format(it=item, t1=inventory[item][0], t2=inventory[item][1]))
+        inv_formated.append('{it:^3}|{t1:^3}|{t2:20}'.format(it=item, t1=inventory[item][0], t2=inventory[item][1]))
         total += inventory[item][0]
 
-    list_help.append('{:<30}'.format('-'*29))
-    list_help.append('{text:<30}'.format(text='Total items: %s' % total))
-    return list_help, total  # returns total to check how many items we have
+    inv_formated.append('{:<30}'.format('-'*29))
+    inv_formated.append('{text:<30}'.format(text='Total items: %s' % total))
+    return inv_formated, total  # returns total to check how many items we have
 
 
-def create_board(inv, total, level):
-    # board = [['.' if y > 0 and y < 39 else '\033[7;30;43m' + '#' + '\033[0m' for y in range(40)] if x > 0 and x < 19
+def create_board():
+    """Creates empty board and then adds obstacles to it.
+
+    Returns:
+        board (list): list of lists containing board elements
+    """
+    # board = [[' ' if y > 0 and y < 39 else '\033[7;30;43m' + '#' + '\033[0m' for y in range(40)] if x > 0 and x < 19
     #          else ['\033[7;30;43m' + '#' + '\033[0m' for x in range(40)] for x in range(20)]
     board = []
+
     for row in range(20):
         rows = []
         for cell in range(40):
             if row == 0 or row == 19:
-                rows.append('#')
+                rows.append(OBSTACLES[0])
             else:
                 if cell == 0 or cell == 39:
-                    rows.append('#')
+                    rows.append(OBSTACLES[0])
                 else:
                     rows.append(' ')
         board.append(rows)
-    if level == 1:
-        board = board_obstacle_one(board)
-    elif level == 2:
-        board = board_obstacle_two(board)
-    elif level == 3:
-        board = board_obstacle_three(board)
+    baord = board_obstacle(board)
     return board
 
 
-def board_obstacle_one(board):
-    # print(board)
-    for x in range(3, 8):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(3, 7):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
-    for x in range(28, 34):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(2, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
-    for x in range(20, 25):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(12, 18):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
-    for x in range(4, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(11, 17):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
+def board_obstacle(board):
+    """Generating random obstacles on board
 
-    item_pos('&', board)
-    item_pos('%', board)
-    item_pos('^', board)
-    item_pos('!', board)
-    item_pos('*', board)
-    return board
+    Args:
+        board (list): empty board generated as list of lists
 
+    Returns:
+        board (list): updated board with OBSTACLES elements
+    """
+    for x in range(randint(1, 3)):
+        for obstacle in OBSTACLES[1:]:
+            length = randint(2, 18)
+            height = randint(3, 8)
+            mod_x = randint(5, 20)
+            mod_y = randint(3, 10)
 
-def board_obstacle_two(board):
-    # print(board)
-    for x in range(5, 7):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(1, 7):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '⛰'
-    for x in range(28, 30):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(1, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '⛰'
-    for x in range(8, 10):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(11, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '⛰'
-    for x in range(24, 26):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(13, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '⛰'
-    for x in range(18, 20):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(1, 14):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '⛰'
-    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(11, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '⛰'
-    item_pos('&', board)
-    item_pos('%', board)
-    item_pos('^', board)
-    item_pos('!', board)
-    item_pos('*', board)
-    return board
+            for x in range(length):
+                for y in range(height):
+                    board[y + mod_y][x + mod_x] = obstacle
+    for item in ITEMS:
+        item_pos(item, board)
 
-
-def board_obstacle_three(board):
-    # print(board)
-    for x in range(5, 6):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(3, 4):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(28, 29):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(9, 10):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(24, 25):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(19, 20):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(13, 14):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(16, 17):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(13, 14):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(18, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(8, 9):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(10, 11):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(27, 28):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(7, 8):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    for x in range(27, 28):  # x-na szeroskosc/ex.(10,12) its 2*x count fr.left/10
-        for y in range(2, 3):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
-            board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
-    item_pos('&', board)
-    item_pos('%', board)
-    item_pos('^', board)
-    item_pos('!', board)
-    item_pos('*', board)
     return board
 
 
 def print_board(board, inv):
+    """Prints inventory and board on terminal window
+
+    Args:
+        board (list): list of lists containing board elements to print
+    """
     for row in range(len(board)):
         if row in range(len(inv)):
             print('{:<30}{}'.format(inv[row], ''.join(board[row])))
@@ -160,24 +99,58 @@ def print_board(board, inv):
             print('{:30}{}'.format('', ''.join(board[row])))
 
 
-def hero_pos(board, x=10, y=10):
+def hero_pos(board, x=choice(HERO_START_POS)[0], y=choice(HERO_START_POS)[1]):  # choice allows to select random value from HERO_START_POS
+    """Sets hero represented as @ on x, y position on board
+
+    Args:
+        board (list): list of lists which contains board elements
+        x (int): x position of hero on board
+        y (int): y position of hero on board
+
+    Returns:
+        x (int): x position of hero on board
+        y (int): y position of hero on board
+    """
     board[y][x] = '\033[1;33;1m' + '@' + '\033[0m'
+
     return x, y
 
 
 def item_pos(item_sign, board):
+    """Generates and places item on random positon on board
+
+    Args:
+        board (list): updated list of lists containing board elements
+        item_sign (char): char which represents item_sign
+    """
     y = randint(1, 18)
     x = randint(1, 38)
+
     if board[y][x] in OBSTACLES:
-        if (board[y-1][x] or board[y+1][x] or board[y][x-1] or board[y][x+1]) not in OBSTACLES:
+        if (board[y-1][x] or board[y+1][x] or board[y][x-1] or board[y][x+1]) not in OBSTACLES:  # checks if there aren't chars that blocks way to get to item
             board[y][x] = item_sign
         else:
-            item_pos(item_sign, board)
+            item_pos(item_sign, board)  # recurence which allows us to place the same item on different position
     else:
         board[y][x] = item_sign
 
 
 def walk(board, x, y, inv):
+    """Checks if hero can move to location by checking what element of board is on x, y position to wich hero should be moved.
+    limit_x, limit_y are local variables storing current position, and if neccessary, used to restore hero position if he can't go in selected postion.
+    If hero want to change position to item location, function add_inv() is called. If hero want to chage position to boss location, boss_game.main() is called.
+
+    Args:
+        board (list): list of lists containing board elements
+        x (int): current x postion of hero
+        y (int): current y postion of hero
+        inv (dict): current dictionary holding items and their atributes
+
+    Returns:
+        x (int): new x hero position on board
+        x (int): new y hero position on board
+        inv (dict): current/upadted dictionary holdings items and their atributes
+    """
     move = getch()
 
     limit_x = x
@@ -195,69 +168,98 @@ def walk(board, x, y, inv):
     elif move == 'q':
         exit()
 
-    if board[y][x] in ITEMS:
-        inv = add_inv(inv, board[y][x])
+    if board[y][x] in ITEMS:  # check if symbol on position x, y is in predefined ITEMS list
+        inv = add_inv(inv, board[y][x])  # if yes call add_inv
 
     if board[y][x] in OBSTACLES:
         x = limit_x
         y = limit_y
 
     if board[y][x] == '😠':  # boss fight here
-        os.system('clear')
-        boss_init()  # boss ascii art init
-        os.system('clear')
-        boss_game.main()  # boss game init
+        system('clear')
+        ascii_art.boss_init()  # boss ascii art initialization
+        system('clear')
+        boss_game.main()  # boss game initialization
 
     x, y = hero_pos(board, x, y)
     return x, y, inv
 
 
 def add_inv(inventory, item):
+    """Adds +1 to item count in inventory and returns updated inventory
+
+    Args:
+        inventory (dict): current dictionary holding items and their atributes
+        item (char): char representing item
+
+    Returns:
+        inventory (dict): updated dictionary holding items and their atributes
+    """
     if item in inventory:
         inventory[item][0] += 1
     return inventory
 
 
-def item_attributes(name, weight=1, it_type='Other'):
+def item_attributes(name, weight, it_type='Other'):
+    """Returns formatted string with item atributes
+
+    Args:
+        name (str): string representing item name
+        weight (int): int representing item weight (for future use)
+        it_type (str): string representing item type
+
+    Returns:
+        atributes (str): formatted string with item name, weight and type
+    """
     atributes = '{:^8}|{:^3}|{:^9}'.format(name, weight, it_type)
     return atributes
 
 
-def boss_position(board, x=38, y=18):  # hello boss
+def boss_position(board, x=37, y=17):  # hello boss
+    """Spawns boss on x, y position on board
+
+    Args:
+        board (list): list of lists containing board elements
+        x (int): boss x position on board
+        y (int): boss y position on board
+
+    Returns:
+        board (list): updated list of lists containing board elements
+    """
     board[y][x] = '😠'
     return board
 
 
-def next_level(level, inventory, total):
-    board = create_board(inventory, total, level)
-    return board
-
-
 def main():
-    intro()
-    os.system('clear')
-    you_know_it()
+    """Script main loop, which creates inventory, and calls ascii arts from external filesself."""
+    ascii_art.intro()
+    system('clear')
+    ascii_art.know_how()
     inventory = {'^': [0, item_attributes(name='czapka', weight=2, it_type='Clothes')],
                  '&': [0, item_attributes(name='szal', weight=1, it_type='Clothes')],
                  '%': [0, item_attributes(name='browar', weight=5, it_type='Food')],
                  '*': [0, item_attributes(name='ciastko', weight=1, it_type='Food')],
                  '!': [0, item_attributes(name='patyk', weight=2)]}
 
-    os.system('clear')
+    system('clear')
     level = 1
     inv, total_items = loot_table(inventory)
-    game_board = create_board(inv, total_items, level)
+    game_board = create_board()
     x, y = hero_pos(game_board)
+
     while True:
-        os.system('clear')
+        system('clear')
+
         if level == 1 and total_items == 5:
             level += 1
-            game_board = next_level(level, inv, total_items)
+            game_board = create_board()
             x, y = hero_pos(game_board)
+
         elif level == 2 and total_items == 10:
             level += 1
-            game_board = next_level(level, inv, total_items)
+            game_board = create_board()
             x, y = hero_pos(game_board)
+
         elif level == 3 and total_items == 15:
             game_board = boss_position(game_board)
 

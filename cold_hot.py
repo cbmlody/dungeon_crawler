@@ -1,5 +1,6 @@
 import random
 from getch import pause_exit
+from ascii_art import winner
 
 def pick_number():
     """picking random number (three different digits)"""
