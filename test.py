@@ -1,9 +1,11 @@
 import os
 from random import randint
 
+OBSTACLES = ['#', '\x1b[1;32;1m' + '🌵' + '\x1b[0m', '⛰', '\x1b[1;31;1m' + '⌂' + '\x1b[0m']
+
 
 def create_board(level):
-    board = [['.' if y > 0 and y < 39 else '\033[7;30;43m' + '#' + '\033[0m' for y in range(40)] if x > 0 and x < 19
+    board = [[' ' if y > 0 and y < 39 else '\033[7;30;43m' + '#' + '\033[0m' for y in range(40)] if x > 0 and x < 19
              else ['\033[7;30;43m' + '#' + '\033[0m' for x in range(40)] for x in range(20)]
     if level == 1:
         board = board_obstacle_one(board)
@@ -29,11 +31,11 @@ def board_obstacle_one(board):
         for y in range(11, 17):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
             board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
 
-    item_pos('&', board)
-    item_pos('%', board, 8, 28)
-    item_pos('^', board, 5, 7)
-    item_pos('!', board, 16, 30)
-    item_pos('*', board, 16, 4)
+    item_pos('\x1b[1;22;1m'+'&'+'\x1b[0m', board)
+    item_pos('\x1b[1;22;1m'+'^'+'\x1b[0m', board)
+    item_pos('\x1b[1;22;1m'+'%'+'\x1b[0m', board)
+    item_pos('\x1b[1;22;1m'+'!'+'\x1b[0m', board)
+    item_pos('\x1b[1;22;1m'+'*'+'\x1b[0m', board)
     return board
 
 
@@ -111,10 +113,15 @@ def print_board(board):
 
 
 def item_pos(item_sign, board):
-    a = randint(1, 38)
-    b = randint(1, 18)
-
-    board[a][b] = item_sign
+    y = randint(1, 18)
+    x = randint(1, 38)
+    if board[y][x] in OBSTACLES:
+        if (board[y-1][x] or board[y+1][x] or board[y][x-1] or board[y][x+1]) not in OBSTACLES:
+            board[y][x] = item_sign
+        else:
+            item_pos(item_sign, board)
+    else:
+        board[y][x] = item_sign
 
 
 def main():

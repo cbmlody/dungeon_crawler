@@ -1,5 +1,6 @@
 import os
 import time
+from random import randint
 from getch import getch, pause
 from knowhow import you_know_it
 from welcomescreen import intro
@@ -76,10 +77,10 @@ def board_obstacle_one(board):
             board[y][x] = '\x1b[1;31;1m' + '⌂' + '\x1b[0m'
 
     item_pos('&', board)
-    item_pos('%', board, 8, 28)
-    item_pos('^', board, 5, 7)
-    item_pos('!', board, 16, 30)
-    item_pos('*', board, 16, 4)
+    item_pos('%', board)
+    item_pos('^', board)
+    item_pos('!', board)
+    item_pos('*', board)
     return board
 
 
@@ -104,10 +105,10 @@ def board_obstacle_two(board):
         for y in range(11, 19):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
             board[y][x] = '⛰'
     item_pos('&', board)
-    item_pos('%', board, 3, 33)
-    item_pos('^', board, 2, 4)
-    item_pos('!', board, 12, 24)
-    item_pos('*', board, 18, 14)
+    item_pos('%', board)
+    item_pos('^', board)
+    item_pos('!', board)
+    item_pos('*', board)
     return board
 
 
@@ -144,10 +145,10 @@ def board_obstacle_three(board):
         for y in range(2, 3):  # x-na dlugosc/(3,7) its 4*x and count fr. up-down/3
             board[y][x] = '\x1b[1;32;1m' + '🌵' + '\x1b[0m'
     item_pos('&', board)
-    item_pos('%', board, 8, 28)
-    item_pos('^', board, 5, 7)
-    item_pos('!', board, 16, 30)
-    item_pos('*', board, 16, 4)
+    item_pos('%', board)
+    item_pos('^', board)
+    item_pos('!', board)
+    item_pos('*', board)
     return board
 
 
@@ -164,8 +165,16 @@ def hero_pos(board, x=10, y=10):
     return x, y
 
 
-def item_pos(item_sign, board, a=15, b=20):
-    board[a][b] = item_sign
+def item_pos(item_sign, board):
+    y = randint(1, 18)
+    x = randint(1, 38)
+    if board[y][x] in OBSTACLES:
+        if (board[y-1][x] or board[y+1][x] or board[y][x-1] or board[y][x+1]) not in OBSTACLES:
+            board[y][x] = item_sign
+        else:
+            item_pos(item_sign, board)
+    else:
+        board[y][x] = item_sign
 
 
 def walk(board, x, y, inv):
